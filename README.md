@@ -1,153 +1,81 @@
-# jev-mcp
+# Evaluate supplied evidence with ChatGPT and Jev
 
-[![CI](https://github.com/tphakala/jev-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/tphakala/jev-mcp/actions/workflows/ci.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/tphakala/jev-mcp.svg)](https://pkg.go.dev/github.com/tphakala/jev-mcp)
-[![codecov](https://codecov.io/gh/tphakala/jev-mcp/branch/main/graph/badge.svg)](https://codecov.io/gh/tphakala/jev-mcp)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/tphakala/jev-mcp)](go.mod)
-[![Latest release](https://img.shields.io/github/v/release/tphakala/jev-mcp?sort=semver&label=release)](https://github.com/tphakala/jev-mcp/releases/latest)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/tphakala/jev-mcp/badge)](https://scorecard.dev/viewer/?uri=github.com/tphakala/jev-mcp)
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+Build the local evidence server and inspect the original fixtures:
 
-jev-mcp is an MCP server that gives an agent typed, probabilistic decisions from TypeSafe's Jev "System One" model, over the TypeSafe API or OpenRouter. Jev answers structured choice, score, and yes/no questions about program state in one fast pass, so an agent can route, classify, gate, or rank without a text model inventing free-form output.
-
-## Install
-
-```
-go install github.com/tphakala/jev-mcp/cmd/jev-mcp@latest
+```sh
+go build -o bin/jev-evidence ./cmd/jev-evidence
+./bin/jev-evidence status
+./bin/jev-evidence lint --input testdata/evidence/plan.json
+go run ./cmd/jev-calibrate --input testdata/evidence/calibration.json
 ```
 
-Requires Go 1.27 or later. Binaries for linux, darwin and windows are attached to every [release](https://github.com/tphakala/jev-mcp/releases/latest), and a container image for linux/amd64 and linux/arm64 is published to `ghcr.io/tphakala/jev-mcp` for each release tag.
+Requires Go **1.27 or later**. These commands are offline. Live evaluation requires server-side `TYPESAFE_API_KEY` and explicit `JEV_EVIDENCE_MODEL`; inject secrets from the environment or an existing secret store. Never put keys in ChatGPT messages or source passages.
 
-## Quick start
+## Use the evidence workflow
 
-Get an API key from TypeSafe (or use an OpenRouter key), then check the setup:
+1. Give ChatGPT an ordinary request, candidates and supplied source snapshots. Use the [preparation instructions](docs/chatgpt.md) to produce requirements, preferences, atomic claims, indispensable premises, exact passages and assumptions.
+2. Call `lint_plan`, then `evaluate_plan`. ChatGPT prepares and explains; Go validates and applies policy; TypeSafe/Jev judges narrow evidence questions. Source retrieval stays outside the server.
+3. Read the report's citations, raw judgments/distributions, counterevidence, assumptions, gaps, coverage and eligibility. Only eligible candidates reach the dependent preference Choice. Investigation and abstention remain explicit.
 
-```
-export TYPESAFE_API_KEY=...
-jev-mcp doctor -probe
-```
+Documentary support measures supplied material. It does not establish empirical truth, source reliability, semantic accuracy or complete retrieval. A useful qualification is: “Complete documentary support; one original source; reliability not independently assessed; no conflict found in the supplied material.” Uncalibrated judgments are advisory.
 
-`doctor` prints the resolved settings and where each came from, and `-probe` makes one small live call per selected provider, all providers at once. API keys and the HTTP token are never printed; each is shown as `set`, `unset`, `blank` (only spaces, tabs, and line breaks), or `invalid` (holds an ASCII control character other than tab).
+## Connect a local MCP client
 
-Add the server to Claude Code:
-
-```
-claude mcp add jev -e TYPESAFE_API_KEY=your-key -- jev-mcp
+```sh
+./bin/jev-evidence serve --transport stdio
 ```
 
-Any MCP client that launches stdio servers works the same way; in the usual `mcpServers` JSON form:
+Stdio is the default, including with no arguments; diagnostics use stderr. For loopback Streamable HTTP, inject independent `JEV_EVIDENCE_HTTP_TOKEN` and run:
 
-```json
-{
-  "mcpServers": {
-    "jev": {
-      "command": "jev-mcp",
-      "env": { "TYPESAFE_API_KEY": "your-key" }
-    }
-  }
-}
+```sh
+./bin/jev-evidence serve --transport http --listen 127.0.0.1:8080
 ```
 
-With the container image instead of a local binary, keep stdin open with `-i` (images are tagged with the release version):
+Connect to `/mcp` using that local bearer token. The stateless adapter retains Host, Origin and loopback protection. See [transports](docs/transports.md) and [operations](docs/operations.md) for proxying, secrets, outages and shutdown.
 
-```
-docker run -i --rm -e TYPESAFE_API_KEY ghcr.io/tphakala/jev-mcp:0.1.0
-```
+The default ChatGPT path is the official **external OpenAI Secure MCP Tunnel client** forwarding stdio or loopback HTTP. The runbook contains verified commands and account-owner setup. No account/tunnel association, public deployment or firewall change is performed by this checkout. Current OpenAI setup documentation describes web access; **ChatGPT iOS** availability and a real authenticated mobile round trip remain separate gates.
 
-## Usage
+## Inspect tools and policy
 
-```
-jev-mcp                        # serve MCP over stdio (the default)
-jev-mcp -http 127.0.0.1:8765   # serve Streamable HTTP on a loopback address
-jev-mcp doctor [-probe]        # check the configuration and providers
-jev-mcp -version
-```
-
-Serve flags:
-
-| Flag | Meaning |
+| Tool | Behavior |
 | --- | --- |
-| `-http addr` | Serve Streamable HTTP on `addr` instead of stdio. The host must be loopback (`127.0.0.1`, `::1`, or a name that resolves only to loopback); anything else is refused. |
-| `-http-token token` | Require `Authorization: Bearer <token>` in HTTP mode. Overrides `JEV_MCP_HTTP_TOKEN`; an explicit empty value forces unauthenticated. Trimmed and checked like the variable. Without a token, HTTP mode logs a warning at startup. |
-| `-log-level level` | `debug`, `info` (default), `warn`, or `error`. |
-| `-log-json` | Write logs as JSON instead of text. |
+| `lint_plan` | Offline IDs/linkage/versions/hashes/quotes/bounds validation and bounded heuristic warnings. Lint cannot prove semantic completeness or non-overlap. |
+| `evaluate_plan` | Relations first, sufficiency on identified supporting subsets next, Go eligibility gates, dependent Choice. Preferences cannot compensate for mandatory gaps/conflicts. |
+| `status` | Secret-free local capabilities, configuration health, requested provider/model and rubric/policy versions. No paid probe. |
 
-Logs go to stderr; in stdio mode stdout carries only the MCP stream.
+The evidence entry point uses direct TypeSafe behind a narrow interface: one end-to-end deadline; bounded input, concurrency, calls and retries; no silent model/provider fallback. Raw fractional Score values are never rounded into Complete support. Supplied source instructions are untrusted evidence. URLs/paths in plans are metadata and are never fetched/opened.
 
-In HTTP mode point the client at the listen address, for example `http://127.0.0.1:8765/`. Cross-origin browser requests other than GET, HEAD, and OPTIONS are rejected. Because the bind is loopback only, a container can serve HTTP only with `--network host`; stdio is the supported container mode.
+## Read the project documents
 
-## Configuration
-
-Everything is read from the environment. `TYPESAFE_API_KEY`, `TYPESAFE_BASE_URL`, and `TYPESAFE_DEFAULT_MODEL` match the official TypeSafe SDK, so an existing setup keeps working.
-
-| Variable | Default | Meaning |
-| --- | --- | --- |
-| `TYPESAFE_API_KEY` | | TypeSafe API key. |
-| `OPENROUTER_API_KEY` | | OpenRouter API key. |
-| `JEV_MCP_PROVIDER` | `auto` | `auto`, `typesafe`, or `openrouter`. `auto` uses TypeSafe when its key is set, else OpenRouter; with both keys set, TypeSafe is primary and OpenRouter the fallback. |
-| `JEV_MCP_FALLBACK` | `true` | Whether `auto` mode falls back to the second provider. |
-| `JEV_MCP_DEFAULT_MODEL` | `jev-latest` | Model used when a call does not name one. `TYPESAFE_DEFAULT_MODEL` is read when this is unset. |
-| `JEV_MCP_TIMEOUT` | `30s` | Budget for one tool call across all retries and the fallback, as a Go duration. |
-| `JEV_MCP_MAX_RETRIES` | `2` | Retries per provider after the first attempt. |
-| `JEV_MCP_TYPESAFE_BASE_URL` | `https://api.typesafe.ai` | TypeSafe base URL. `TYPESAFE_BASE_URL` is read when this is unset. |
-| `JEV_MCP_OPENROUTER_BASE_URL` | `https://openrouter.ai/api` | OpenRouter base URL. |
-| `JEV_MCP_HTTP_TOKEN` | | Bearer token for HTTP mode. Leading and trailing spaces, tabs, and line breaks are trimmed; HTTP mode refuses to start when nothing else is left, or when what is left holds an ASCII control character other than tab, unless `-http-token` overrides it. Stdio mode ignores it. |
-
-At least one API key is required to serve. The keys are trimmed like the HTTP token. A key that is only spaces, tabs, and line breaks, or that still holds an ASCII control character other than tab (which cannot be sent in a header), stops the server at startup with an error naming the variable whenever that provider would be used, including as the fallback; unset the variable instead of leaving it blank. `doctor` reports such a key even when that provider would not be used.
-
-Rate limits (429), overload (503, 529), other server errors, request timeouts (408), and transport failures are retried with jittered exponential backoff, honouring `Retry-After` and `Retry-After-Ms` up to a 20 second wait. In `auto` mode with both keys, those failures and a rejected key move on to the fallback provider; a request the provider rejects as invalid does not, since it would fail there too.
-
-## The `jev_evaluate` tool
-
-One tool, `jev_evaluate`, decides one or more questions over a shared state in a single call.
-
-| Input | Meaning |
+| Task | Document |
 | --- | --- |
-| `state` | What to decide over: a string, or a JSON object or array. Text only, at most 1 MiB encoded. |
-| `questions` | 1 to 64 questions, each `{name, type, instructions, criteria}`. Names must be unique, at most 128 bytes, and free of control characters. `instructions` is the question to decide: usually a string, or a non-empty object or array. |
-| `model` | Optional Jev model id, such as `jev-latest` or `jev-1.13.0`. |
-| `detail` | `summary` (default) or `full`; controls the text result only. |
+| Understand dependency order and implementation plan | [Design](docs/design.md) |
+| Interpret levels, applicability and accepted references | [Rubric and provenance](docs/rubric-provenance.md) |
+| Prepare requests and explain citations/gaps | [ChatGPT instructions](docs/chatgpt.md) |
+| Run locally, prepare tunnels or optional public OAuth/TLS | [Operations](docs/operations.md) |
+| Give Grok Bot a future private CapRover deployment task for bots.ac | [Grok Bot handoff](docs/grokbot-caprover.md) |
+| Check adapters and proxy trust boundaries | [Transports](docs/transports.md) |
+| Analyze held-out reports and threshold sweeps | [Calibration](docs/calibration.md) |
+| Inspect source contents, pinned revisions and licenses | [Source review](docs/source-review.md) |
+| Reproduce checks and identify missing proof | [Verification](docs/verification.md) |
 
-Question types:
+Original [testdata/evidence](testdata/evidence) fixtures are synthetic software tests, not copied research datasets or measured live semantic benchmarks.
 
-- `choice` picks one option. `criteria` is an object of 2 to 255 option names to descriptions. A description is usually a string, an object, or `null`; it is passed to the provider unchecked.
-- `score` places the state on an ordered scale. `criteria` is an array of 2 to 10 level descriptions, lowest first. A level is usually a string or an object; any value but `null` is passed to the provider unchecked.
-- `noul` answers a yes/no proposition. `criteria` is optional: an object whose keys may only be `true` and `false`, each a description. The answer is the probability that the proposition is true.
+## Verify changes
 
-Example arguments:
-
-```json
-{
-  "state": {"ticket": "My card was charged twice for the same order, please refund one", "customer_tier": "gold"},
-  "questions": [
-    {"name": "route", "type": "choice", "instructions": "Which team should handle this ticket?",
-     "criteria": {"billing": "payments and refunds", "shipping": null, "tech": "app bugs"}},
-    {"name": "urgency", "type": "score", "instructions": "How urgent is this ticket?",
-     "criteria": ["low", "medium", "high"]},
-    {"name": "refund", "type": "noul", "instructions": "The customer is asking for a refund."}
-  ]
-}
+```sh
+gofmt -l .
+go test ./...
+go test -race ./...
+go vet ./...
+go build ./...
+task check
 ```
 
-The default text result is a compact summary, answers in question order:
+The upstream gate also checks both architectures, tidy, pinned lint and ruleguard probes. Follow [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md). [Verification](docs/verification.md) records actual results separately from checks requiring credentials, account permissions or an iOS session. Paid checks and benchmark sweeps are opt-in.
 
-```json
-{"answers":[{"name":"route","choice":"billing","confidence":1},{"name":"urgency","score":1.27,"confidence":0.52},{"name":"refund","noul":0.98}]}
-```
+## Preserve the foundation
 
-The structured result always carries the full output: per answer the `type` and the decision, for a choice or score also `confidence` and `probabilities`, and for a score the `legend`; an answer this server cannot read comes back verbatim under `raw`. Each call also reports `provider`, `model`, token `usage` (with `cost` when the provider reports it), `latency_ms`, and `attempts`. With `detail` set to `full`, the text result carries the same full output, for clients that show the model only the text.
+This local derivative uses [tphakala/jev-mcp at f51a9267f74a641f44f90fa5e1a8d3125edc9a35](https://github.com/tphakala/jev-mcp/tree/f51a9267f74a641f44f90fa5e1a8d3125edc9a35). The Apache-2.0 [LICENSE](LICENSE), source notices and upstream contribution/security guidance remain.
 
-State and instructions are sent to the provider's API, so do not put secrets in them.
-
-## Development
-
-```
-task check   # build, vet (amd64/arm64), tidy check, lint, ruleguard probe, race tests
-task tools   # install the pinned golangci-lint and govulncheck
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
-
-## License
-
-Apache License 2.0, see [LICENSE](LICENSE).
+The original `cmd/jev-mcp` primitive server retains `jev_evaluate`, provider options and fallback behavior; see its [pinned upstream README](https://github.com/tphakala/jev-mcp/blob/f51a9267f74a641f44f90fa5e1a8d3125edc9a35/README.md). Those primitives do not enforce this evidence workflow's gates. Build **`cmd/jev-evidence`** for this project's evidence contract.

@@ -23,5 +23,7 @@ coverage.txt
 .claude/
 CLAUDE.local.md
 
-# Local design and planning notes; never part of the published project
-/docs/
+# Project-local verification tools and private configuration
+/.tools/
+.env
+.env.local
