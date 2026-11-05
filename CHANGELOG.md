@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Evidence workflow in `cmd/jev-evidence`: supplied snapshots, claim/passage judgments, documentary-support-v1 anchors, deterministic eligibility gates, dependent Choice, provenance and auditable reports.
+- Offline plan linting, a developer calibration CLI, original fixtures, transport/provider contracts, and ChatGPT preparation, source-review and operations documentation.
 - Initial project scaffolding.
 - `jev_evaluate` MCP tool: decide choice, score and noul questions over a shared state with Jev, through TypeSafe or OpenRouter, with retry and provider fallback.
 - Serving over stdio (the default) or loopback Streamable HTTP (`-http`), with optional bearer auth (`-http-token` or `JEV_MCP_HTTP_TOKEN`) and `-log-level` / `-log-json`.

@@ -1,0 +1,78 @@
+{
+  "version": "evidence-plan-v1",
+  "id": "plan",
+  "rubric": "documentary-support-v1",
+  "as_of": "2026-10-21",
+  "profile": {
+    "version": "evidence-profile-v1",
+    "name": "document review",
+    "facets": [
+      "provenance",
+      "snapshot",
+      "evidence_kind",
+      "method",
+      "authority",
+      "relevance"
+    ]
+  },
+  "requirements": [
+    {
+      "id": "r",
+      "text": "Offline export is required",
+      "mandatory": true
+    }
+  ],
+  "preferences": [
+    {
+      "id": "pref",
+      "text": "Prefer simple export",
+      "weight": 1
+    }
+  ],
+  "candidates": [
+    {
+      "id": "candidate",
+      "name": "Product",
+      "requirement_claims": {
+        "r": [
+          "c"
+        ]
+      }
+    }
+  ],
+  "claims": [
+    {
+      "id": "c",
+      "text": "The product supports offline export.",
+      "scope": {
+        "version": "1"
+      },
+      "passage_ids": [
+        "p"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "s",
+      "title": "Product manual",
+      "evidence_kind": "assertion",
+      "origin": "publisher",
+      "snapshot": "The product supports offline export.",
+      "sha256": "191830ab6f794ff7679f4253961ba151d20e50ac18211bf61c2e2886b006c375",
+      "captured_at": "2026-10-20T12:00:00Z",
+      "scope": {
+        "version": "1"
+      }
+    }
+  ],
+  "passages": [
+    {
+      "id": "p",
+      "source_id": "s",
+      "start_byte": 0,
+      "end_byte": 36,
+      "excerpt": "The product supports offline export."
+    }
+  ]
+}

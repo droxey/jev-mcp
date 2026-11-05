@@ -1,0 +1,218 @@
+{
+  "validity": "success",
+  "citations": [
+    {
+      "claim_id": "c",
+      "passage_id": "p",
+      "source_id": "s",
+      "source_sha256": "191830ab6f794ff7679f4253961ba151d20e50ac18211bf61c2e2886b006c375",
+      "excerpt": "The product supports offline export.",
+      "start_byte": 0,
+      "end_byte": 36,
+      "scope": {
+        "version": "1"
+      },
+      "relation": "supports",
+      "accepted": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "s",
+      "title": "Product manual",
+      "sha256": "191830ab6f794ff7679f4253961ba151d20e50ac18211bf61c2e2886b006c375",
+      "origin": "publisher",
+      "origin_group": "declared:s",
+      "independence": "declared_unverified",
+      "captured_at": "2026-10-20T12:00:00Z",
+      "scope": {
+        "version": "1"
+      },
+      "evidence_kind": "assertion"
+    }
+  ],
+  "models": [
+    {
+      "provider": "local-fixture",
+      "requested_model": "fixture-v1",
+      "resolved_model": "fixture-v1"
+    }
+  ],
+  "version": "evidence-plan-v1",
+  "rubric": "documentary-support-v1",
+  "plan_id": "plan",
+  "policy": "evidence-policy-v1",
+  "calibration": "advisory_uncalibrated",
+  "profile": {
+    "version": "evidence-profile-v1",
+    "name": "document review",
+    "facets": [
+      "provenance",
+      "snapshot",
+      "evidence_kind",
+      "method",
+      "authority",
+      "relevance"
+    ]
+  },
+  "coverage": {
+    "total": 1,
+    "evaluated": 1,
+    "supported": 1,
+    "contradicted": 0,
+    "missing": 0,
+    "skipped": 0,
+    "failed": 0
+  },
+  "requirement_coverage": {
+    "total": 1,
+    "evaluated": 1,
+    "supported": 1,
+    "contradicted": 0,
+    "missing": 0,
+    "skipped": 0,
+    "failed": 0
+  },
+  "quality": [
+    {
+      "source_id": "s",
+      "facet": "provenance",
+      "status": "unverified",
+      "detail": "Caller-supplied origin and lineage; real independence is unverified"
+    },
+    {
+      "source_id": "s",
+      "facet": "snapshot",
+      "status": "checked",
+      "detail": "Supplied UTF-8 bytes are checked against SHA-256 and excerpts"
+    },
+    {
+      "source_id": "s",
+      "facet": "evidence_kind",
+      "status": "unverified",
+      "detail": "assertion"
+    },
+    {
+      "source_id": "s",
+      "facet": "method",
+      "status": "unverified"
+    },
+    {
+      "source_id": "s",
+      "facet": "authority",
+      "status": "unverified"
+    },
+    {
+      "source_id": "s",
+      "facet": "relevance",
+      "status": "unverified",
+      "detail": "Exact declared scope checked; semantic relevance remains advisory"
+    }
+  ],
+  "plan_sha256": "4dbbad6db206d8785ba2fa51459dd85cc1096e5af58686dd3ff77062690f619b",
+  "outcome": "selected",
+  "selected_id": "candidate",
+  "claims": [
+    {
+      "claim_id": "c",
+      "text": "The product supports offline export.",
+      "scope": {
+        "version": "1"
+      },
+      "status": "success",
+      "validity": "success",
+      "level": 2,
+      "complete": true,
+      "directness": "direct_statement",
+      "directness_answer": {
+        "id": "direct:c",
+        "selected": "direct_statement",
+        "raw": {
+          "fixture": true
+        },
+        "provider": "local-fixture",
+        "requested_model": "fixture-v1",
+        "resolved_model": "fixture-v1",
+        "status": "success",
+        "validity": "success"
+      },
+      "conflict": false,
+      "passages": [
+        {
+          "passage_id": "p",
+          "relation": "supports",
+          "applicable": true,
+          "origin": "declared:s",
+          "answer": {
+            "id": "rel:c:p",
+            "selected": "supports",
+            "raw": {
+              "fixture": true
+            },
+            "provider": "local-fixture",
+            "requested_model": "fixture-v1",
+            "resolved_model": "fixture-v1",
+            "status": "success",
+            "validity": "success"
+          }
+        }
+      ],
+      "supporting_passage_ids": [
+        "p"
+      ],
+      "contradicting_passage_ids": [],
+      "supporting_origins": [
+        "declared:s"
+      ],
+      "contradicting_origins": [],
+      "answer": {
+        "id": "suff:c",
+        "semantic_level": 2,
+        "score": 2,
+        "probabilities": {
+          "0": 0,
+          "1": 0,
+          "2": 1
+        },
+        "raw": {
+          "fixture": true
+        },
+        "provider": "local-fixture",
+        "requested_model": "fixture-v1",
+        "resolved_model": "fixture-v1",
+        "status": "success",
+        "validity": "success"
+      }
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "candidate",
+      "eligible": true,
+      "requirements": [
+        {
+          "requirement_id": "r",
+          "mandatory": true,
+          "satisfied": true,
+          "conflict": false,
+          "claim_ids": [
+            "c"
+          ]
+        }
+      ]
+    }
+  ],
+  "choice": {
+    "id": "choice",
+    "selected": "candidate",
+    "raw": {
+      "fixture": true
+    },
+    "provider": "local-fixture",
+    "requested_model": "fixture-v1",
+    "resolved_model": "fixture-v1",
+    "status": "success",
+    "validity": "success"
+  },
+  "calls": 4
+}
