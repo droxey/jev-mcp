@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Private CapRover packaging for the evidence MCP server: a pinned, checksum-verified OpenAI tunnel-client, nonroot stdio launcher, loopback health checks, and stop-first update/rollback configuration. No public ports or provider credentials are included.
 - Evidence workflow in `cmd/jev-evidence`: supplied snapshots, claim/passage judgments, documentary-support-v1 anchors, deterministic eligibility gates, dependent Choice, provenance and auditable reports.
 - Offline plan linting, a developer calibration CLI, original fixtures, transport/provider contracts, and ChatGPT preparation, source-review and operations documentation.
 - Initial project scaffolding.

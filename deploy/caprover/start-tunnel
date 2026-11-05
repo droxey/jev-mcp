@@ -1,0 +1,32 @@
+#!/bin/sh
+# exec makes tunnel-client PID 1. v0.0.19 forwards TERM/INT to its stdio child,
+# closes its pipes, and waits for it; no shell wrapper orphans the evidence child.
+set -eu
+
+case ${HEALTH_LISTEN_ADDR:-} in
+    127.0.0.1:*|\[::1\]:*) ;;
+    *)
+        printf '%s\n' 'HEALTH_LISTEN_ADDR must bind an IPv4 or IPv6 loopback address' >&2
+        exit 2
+        ;;
+esac
+
+if [ "${MCP_COMMAND:-}" != /app/start-evidence ]; then
+    printf '%s\n' 'MCP_COMMAND must be /app/start-evidence for this private image' >&2
+    exit 2
+fi
+
+if [ "${MCP_STDIO_FAILURE_POLICY:-exit}" != exit ]; then
+    printf '%s\n' 'MCP_STDIO_FAILURE_POLICY must be exit for external supervision' >&2
+    exit 2
+fi
+
+export TUNNEL_CLIENT_PROFILE_DIR="${TUNNEL_CLIENT_PROFILE_DIR:-/app/profile/tunnel-client}"
+export TUNNEL_CLIENT_PROFILE="${TUNNEL_CLIENT_PROFILE:-caprover-evidence}"
+export MCP_STDIO_FAILURE_POLICY=exit
+
+# Do not inherit a config/profile path that conflicts with --profile.
+unset TUNNEL_CLIENT_CONFIG TUNNEL_CLIENT_PROFILE_FILE
+
+mkdir -p "$TUNNEL_CLIENT_PROFILE_DIR" /app/runtime/cache /app/runtime/state
+exec /app/tunnel-client run --profile "$TUNNEL_CLIENT_PROFILE"

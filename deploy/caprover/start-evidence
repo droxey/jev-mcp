@@ -1,0 +1,10 @@
+#!/bin/sh
+# tunnel-client owns stdin/stdout as MCP transport; diagnostics stay on stderr.
+set -eu
+exec /app/jev-evidence serve \
+    --transport stdio \
+    --timeout 90s \
+    --max-calls 16 \
+    --batch-size 4 \
+    --concurrency 1 \
+    --retries 0
