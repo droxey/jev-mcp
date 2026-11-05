@@ -1,0 +1,7 @@
+# CapRover Service Update Override: avoid two active clients for one stdio tunnel.
+UpdateConfig:
+  Parallelism: 1
+  Order: stop-first
+RollbackConfig:
+  Parallelism: 1
+  Order: stop-first
